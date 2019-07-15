@@ -1,0 +1,2 @@
+0.jpg|images2/0.jpg
+1.jpg|images2/1.jpg

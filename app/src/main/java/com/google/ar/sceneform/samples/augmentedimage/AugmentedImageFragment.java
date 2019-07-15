@@ -42,17 +42,8 @@ import java.io.InputStream;
 public class AugmentedImageFragment extends ArFragment {
   private static final String TAG = "AugmentedImageFragment";
 
-  // This is the name of the image in the sample database.  A copy of the image is in the assets
-  // directory.  Opening this image on your computer is a good quick way to test the augmented image
-  // matching.
-  private static final String DEFAULT_IMAGE_NAME = "default.jpg";
-
   // This is a pre-created database containing the sample image.
-  private static final String SAMPLE_IMAGE_DATABASE = "sample_database.imgdb";
-
-  // Augmented image configuration and rendering.
-  // Load a single image (true) or a pre-generated image database (false).
-  private static final boolean USE_SINGLE_IMAGE = false;
+  private static final String SAMPLE_IMAGE_DATABASE = "newimages.imgdb";
 
   // Do a runtime check for the OpenGL level available at runtime to avoid Sceneform crashing the
   // application.
@@ -112,45 +103,16 @@ public class AugmentedImageFragment extends ArFragment {
       return false;
     }
 
-    // There are two ways to configure an AugmentedImageDatabase:
-    // 1. Add Bitmap to DB directly
-    // 2. Load a pre-built AugmentedImageDatabase
-    // Option 2) has
-    // * shorter setup time
-    // * doesn't require images to be packaged in apk.
-    if (USE_SINGLE_IMAGE) {
-      Bitmap augmentedImageBitmap = loadAugmentedImageBitmap(assetManager);
-      if (augmentedImageBitmap == null) {
-        return false;
-      }
-
-      augmentedImageDatabase = new AugmentedImageDatabase(session);
-      augmentedImageDatabase.addImage(DEFAULT_IMAGE_NAME, augmentedImageBitmap);
-      // If the physical size of the image is known, you can instead use:
-      //     augmentedImageDatabase.addImage("image_name", augmentedImageBitmap, widthInMeters);
-      // This will improve the initial detection speed. ARCore will still actively estimate the
-      // physical size of the image as it is viewed from multiple viewpoints.
-    } else {
-      // This is an alternative way to initialize an AugmentedImageDatabase instance,
-      // load a pre-existing augmented image database.
-      try (InputStream is = getContext().getAssets().open(SAMPLE_IMAGE_DATABASE)) {
-        augmentedImageDatabase = AugmentedImageDatabase.deserialize(session, is);
-      } catch (IOException e) {
-        Log.e(TAG, "IO exception loading augmented image database.", e);
-        return false;
-      }
+    // This is an alternative way to initialize an AugmentedImageDatabase instance,
+    // load a pre-existing augmented image database.
+    try (InputStream is = getContext().getAssets().open(SAMPLE_IMAGE_DATABASE)) {
+      augmentedImageDatabase = AugmentedImageDatabase.deserialize(session, is);
+    } catch (IOException e) {
+      Log.e(TAG, "IO exception loading augmented image database.", e);
+      return false;
     }
 
     config.setAugmentedImageDatabase(augmentedImageDatabase);
     return true;
-  }
-
-  private Bitmap loadAugmentedImageBitmap(AssetManager assetManager) {
-    try (InputStream is = assetManager.open(DEFAULT_IMAGE_NAME)) {
-      return BitmapFactory.decodeStream(is);
-    } catch (IOException e) {
-      Log.e(TAG, "IO exception loading augmented image bitmap.", e);
-    }
-    return null;
   }
 }
