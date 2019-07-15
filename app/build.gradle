@@ -75,3 +75,9 @@ sceneform.asset('sampledata/models/frame_upper_right.obj',
         'default',
         'sampledata/models/frame_upper_right.sfa',
         'src/main/assets/models/frame_upper_right')
+
+
+sceneform.asset('sampledata/lisa/Wall_Art_Classical_01.obj',
+        'default',
+        'sampledata/lisa/Wall_Art_Classical_01.sfa',
+        'src/main/assets/Wall_Art_Classical_01')

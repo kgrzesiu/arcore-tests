@@ -46,6 +46,8 @@ public class AugmentedImageNode extends AnchorNode {
   private static CompletableFuture<ModelRenderable> lrCorner;
   private static CompletableFuture<ModelRenderable> llCorner;
 
+  private static CompletableFuture<ModelRenderable> monaLisa;
+
   public AugmentedImageNode(Context context) {
     // Upon construction, start loading the models for the corners of the frame.
     if (ulCorner == null) {
@@ -66,6 +68,12 @@ public class AugmentedImageNode extends AnchorNode {
               .setSource(context, Uri.parse("models/frame_lower_right.sfb"))
               .build();
     }
+
+    if (monaLisa == null) {
+      monaLisa = ModelRenderable.builder()
+              .setSource(context, Uri.parse("Wall_Art_Classical_01.sfb"))
+              .build();
+    }
   }
 
   /**
@@ -79,7 +87,7 @@ public class AugmentedImageNode extends AnchorNode {
     this.image = image;
 
     // If any of the models are not loaded, then recurse when all are loaded.
-    if (!ulCorner.isDone() || !urCorner.isDone() || !llCorner.isDone() || !lrCorner.isDone()) {
+    if (!ulCorner.isDone() || !urCorner.isDone() || !llCorner.isDone() || !lrCorner.isDone() || !monaLisa.isDone()) {
       CompletableFuture.allOf(ulCorner, urCorner, llCorner, lrCorner)
           .thenAccept((Void aVoid) -> setImage(image))
           .exceptionally(
@@ -95,6 +103,13 @@ public class AugmentedImageNode extends AnchorNode {
     // Make the 4 corner nodes.
     Vector3 localPosition = new Vector3();
     Node cornerNode;
+
+    // Mona lisa
+    localPosition.set(0 * image.getExtentX(), 0.0f, 0 * image.getExtentZ());
+    Node lisaNode = new Node();
+    lisaNode.setParent(this);
+    lisaNode.setLocalPosition(localPosition);
+    lisaNode.setRenderable(monaLisa.getNow(null));
 
     // Upper left corner.
     localPosition.set(-0.5f * image.getExtentX(), 0.0f, -0.5f * image.getExtentZ());
