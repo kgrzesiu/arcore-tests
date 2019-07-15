@@ -28,6 +28,7 @@ import android.widget.Toast;
 import com.google.ar.core.AugmentedImage;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.Node;
+import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.Color;
 import com.google.ar.sceneform.rendering.ExternalTexture;
@@ -56,18 +57,7 @@ public class AugmentedImageNode extends AnchorNode implements AugmentedNode {
   // Controls the height of the video in world space.
   private static final float VIDEO_HEIGHT_METERS = 0.85f;
 
-  // Models of the 4 corners.  We use completable futures here to simplify
-  // the error handling and asynchronous loading.  The loading is started with the
-  // first construction of an instance, and then used when the image is set.
-  private static CompletableFuture<ModelRenderable> monaLisa;
-
   public AugmentedImageNode(Context context) {
-    // Upon construction, start loading the models for the corners of the frame.
-    if (monaLisa == null) {
-      monaLisa = ModelRenderable.builder()
-              .setSource(context, Uri.parse("lisa2.sfb"))
-              .build();
-    }
 
     // Create an ExternalTexture for displaying the contents of the video.
     texture = new ExternalTexture();
@@ -106,22 +96,8 @@ public class AugmentedImageNode extends AnchorNode implements AugmentedNode {
   public void setImage(AugmentedImage image) {
     this.image = image;
 
-    // If any of the models are not loaded, then recurse when all are loaded.
-    if (!monaLisa.isDone()) {
-      CompletableFuture.allOf(monaLisa)
-          .thenAccept((Void aVoid) -> setImage(image))
-          .exceptionally(
-              throwable -> {
-                Log.e(TAG, "Exception loading", throwable);
-                return null;
-              });
-    }
-
     // Set the anchor based on the center of the image.
     setAnchor(image.createAnchor(image.getCenterPose()));
-
-    // Make the 4 corner nodes.
-    Vector3 localPosition = new Vector3();
 
     Node videoNode = new Node();
     videoNode.setParent(this);
@@ -129,9 +105,23 @@ public class AugmentedImageNode extends AnchorNode implements AugmentedNode {
     // Set the scale of the node so that the aspect ratio of the video is correct.
     float videoWidth = mediaPlayer.getVideoWidth();
     float videoHeight = mediaPlayer.getVideoHeight();
+    float scaleFactor = 0.5f;
+
     videoNode.setLocalScale(
             new Vector3(
-                    VIDEO_HEIGHT_METERS * (videoWidth / videoHeight), VIDEO_HEIGHT_METERS, 1.0f));
+                    VIDEO_HEIGHT_METERS * scaleFactor * (videoWidth / videoHeight), VIDEO_HEIGHT_METERS * scaleFactor, 1.0f));
+    //position
+    Vector3 localPosition = new Vector3();
+    localPosition.set(0.0f * image.getExtentX(), -0.08f, 0 * image.getExtentZ());
+    videoNode.setLocalPosition(localPosition);
+
+    //fix lion rotation
+    Quaternion currentRotation = videoNode.getLocalRotation();
+//    currentRotation.x = 0;
+//    currentRotation.y = -90;
+    currentRotation.z = 90;
+    currentRotation.w = 180;
+    videoNode.setLocalRotation(currentRotation);
 
     // Start playing the video when the first node is placed.
     if (!mediaPlayer.isPlaying()) {
