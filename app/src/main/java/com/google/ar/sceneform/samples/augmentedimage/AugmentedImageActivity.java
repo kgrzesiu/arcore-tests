@@ -47,7 +47,7 @@ public class AugmentedImageActivity extends AppCompatActivity {
 
   // Augmented image and its associated center pose anchor, keyed by the augmented image in
   // the database.
-  private final Map<AugmentedImage, AugmentedImageNode> augmentedImageMap = new HashMap<>();
+  private final Map<AugmentedImage, AugmentedNode> augmentedImageMap = new HashMap<>();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -98,10 +98,18 @@ public class AugmentedImageActivity extends AppCompatActivity {
 
           // Create a new anchor for newly found images.
           if (!augmentedImageMap.containsKey(augmentedImage)) {
-            AugmentedImageNode node = new AugmentedImageNode(this);
-            node.setImage(augmentedImage);
-            augmentedImageMap.put(augmentedImage, node);
-            arFragment.getArSceneView().getScene().addChild(node);
+            int index = augmentedImage.getIndex();
+            if (index == 0){
+              MonaLisaAugmentedNode node = new MonaLisaAugmentedNode(this);
+              node.setImage(augmentedImage);
+              augmentedImageMap.put(augmentedImage, node);
+              arFragment.getArSceneView().getScene().addChild(node);
+            } else if (index == 1) {
+              AugmentedImageNode node = new AugmentedImageNode(this);
+              node.setImage(augmentedImage);
+              augmentedImageMap.put(augmentedImage, node);
+              arFragment.getArSceneView().getScene().addChild(node);
+            }
           }
           break;
 
@@ -111,4 +119,5 @@ public class AugmentedImageActivity extends AppCompatActivity {
       }
     }
   }
+
 }

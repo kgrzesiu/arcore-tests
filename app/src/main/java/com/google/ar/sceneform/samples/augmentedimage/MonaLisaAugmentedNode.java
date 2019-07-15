@@ -19,12 +19,14 @@ package com.google.ar.sceneform.samples.augmentedimage;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
+
 import com.google.ar.core.AugmentedImage;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
+
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -32,7 +34,7 @@ import java.util.concurrent.CompletableFuture;
  * at the corners of the augmented image trackable.
  */
 @SuppressWarnings({"AndroidApiChecker"})
-public class AugmentedImageNode extends AnchorNode implements AugmentedNode {
+public class MonaLisaAugmentedNode extends AnchorNode implements AugmentedNode {
 
   private static final String TAG = "AugmentedImageNode";
 
@@ -45,7 +47,7 @@ public class AugmentedImageNode extends AnchorNode implements AugmentedNode {
   // first construction of an instance, and then used when the image is set.
   private static CompletableFuture<ModelRenderable> monaLisa;
 
-  public AugmentedImageNode(Context context) {
+  public MonaLisaAugmentedNode(Context context) {
     // Upon construction, start loading the models for the corners of the frame.
     if (monaLisa == null) {
       monaLisa = ModelRenderable.builder()
@@ -60,6 +62,7 @@ public class AugmentedImageNode extends AnchorNode implements AugmentedNode {
    * extents of the image. There is no need to worry about world coordinates since everything is
    * relative to the center of the image, which is the parent node of the corners.
    */
+  @Override
   @SuppressWarnings({"AndroidApiChecker", "FutureReturnValueIgnored"})
   public void setImage(AugmentedImage image) {
     this.image = image;
@@ -92,10 +95,14 @@ public class AugmentedImageNode extends AnchorNode implements AugmentedNode {
     lisaNode.setParent(this);
     lisaNode.setLocalPosition(localPosition);
     lisaNode.setLocalScale(new Vector3(lisa_scale, lisa_scale, lisa_scale));
+    Quaternion currentRotation = lisaNode.getLocalRotation();
+    currentRotation.y = 180;
+    lisaNode.setLocalRotation(currentRotation);
     lisaNode.setRenderable(monaLisa.getNow(null));
 
   }
 
+  @Override
   public AugmentedImage getImage() {
     return image;
   }
