@@ -37,41 +37,18 @@ public class AugmentedImageNode extends AnchorNode {
 
   // The augmented image represented by this node.
   private AugmentedImage image;
+  private float lisa_scale = 0.0f;
 
   // Models of the 4 corners.  We use completable futures here to simplify
   // the error handling and asynchronous loading.  The loading is started with the
   // first construction of an instance, and then used when the image is set.
-  private static CompletableFuture<ModelRenderable> ulCorner;
-  private static CompletableFuture<ModelRenderable> urCorner;
-  private static CompletableFuture<ModelRenderable> lrCorner;
-  private static CompletableFuture<ModelRenderable> llCorner;
-
   private static CompletableFuture<ModelRenderable> monaLisa;
 
   public AugmentedImageNode(Context context) {
     // Upon construction, start loading the models for the corners of the frame.
-    if (ulCorner == null) {
-      ulCorner =
-          ModelRenderable.builder()
-              .setSource(context, Uri.parse("models/frame_upper_left.sfb"))
-              .build();
-      urCorner =
-          ModelRenderable.builder()
-              .setSource(context, Uri.parse("models/frame_upper_right.sfb"))
-              .build();
-      llCorner =
-          ModelRenderable.builder()
-              .setSource(context, Uri.parse("models/frame_lower_left.sfb"))
-              .build();
-      lrCorner =
-          ModelRenderable.builder()
-              .setSource(context, Uri.parse("models/frame_lower_right.sfb"))
-              .build();
-    }
-
     if (monaLisa == null) {
       monaLisa = ModelRenderable.builder()
-              .setSource(context, Uri.parse("Wall_Art_Classical_01.sfb"))
+              .setSource(context, Uri.parse("lisa2.sfb"))
               .build();
     }
   }
@@ -87,8 +64,8 @@ public class AugmentedImageNode extends AnchorNode {
     this.image = image;
 
     // If any of the models are not loaded, then recurse when all are loaded.
-    if (!ulCorner.isDone() || !urCorner.isDone() || !llCorner.isDone() || !lrCorner.isDone() || !monaLisa.isDone()) {
-      CompletableFuture.allOf(ulCorner, urCorner, llCorner, lrCorner)
+    if (!monaLisa.isDone()) {
+      CompletableFuture.allOf(monaLisa)
           .thenAccept((Void aVoid) -> setImage(image))
           .exceptionally(
               throwable -> {
@@ -102,42 +79,20 @@ public class AugmentedImageNode extends AnchorNode {
 
     // Make the 4 corner nodes.
     Vector3 localPosition = new Vector3();
-    Node cornerNode;
+
+    // Make sure the longest edge fits inside the image.
+    final float liza_max_size = 13.48f;
+    final float max_image_edge = Math.max(image.getExtentX(), image.getExtentZ());
+    lisa_scale = max_image_edge / liza_max_size;
 
     // Mona lisa
     localPosition.set(0 * image.getExtentX(), 0.0f, 0 * image.getExtentZ());
     Node lisaNode = new Node();
     lisaNode.setParent(this);
     lisaNode.setLocalPosition(localPosition);
+    lisaNode.setLocalScale(new Vector3(lisa_scale, lisa_scale, lisa_scale));
     lisaNode.setRenderable(monaLisa.getNow(null));
 
-    // Upper left corner.
-    localPosition.set(-0.5f * image.getExtentX(), 0.0f, -0.5f * image.getExtentZ());
-    cornerNode = new Node();
-    cornerNode.setParent(this);
-    cornerNode.setLocalPosition(localPosition);
-    cornerNode.setRenderable(ulCorner.getNow(null));
-
-    // Upper right corner.
-    localPosition.set(0.5f * image.getExtentX(), 0.0f, -0.5f * image.getExtentZ());
-    cornerNode = new Node();
-    cornerNode.setParent(this);
-    cornerNode.setLocalPosition(localPosition);
-    cornerNode.setRenderable(urCorner.getNow(null));
-
-    // Lower right corner.
-    localPosition.set(0.5f * image.getExtentX(), 0.0f, 0.5f * image.getExtentZ());
-    cornerNode = new Node();
-    cornerNode.setParent(this);
-    cornerNode.setLocalPosition(localPosition);
-    cornerNode.setRenderable(lrCorner.getNow(null));
-
-    // Lower left corner.
-    localPosition.set(-0.5f * image.getExtentX(), 0.0f, 0.5f * image.getExtentZ());
-    cornerNode = new Node();
-    cornerNode.setParent(this);
-    cornerNode.setLocalPosition(localPosition);
-    cornerNode.setRenderable(llCorner.getNow(null));
   }
 
   public AugmentedImage getImage() {

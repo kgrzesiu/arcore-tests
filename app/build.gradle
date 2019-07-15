@@ -81,3 +81,8 @@ sceneform.asset('sampledata/lisa/Wall_Art_Classical_01.obj',
         'default',
         'sampledata/lisa/Wall_Art_Classical_01.sfa',
         'src/main/assets/Wall_Art_Classical_01')
+
+sceneform.asset('sampledata/lisa2/lisa2.obj',
+        'default',
+        'sampledata/lisa2/lisa2.sfa',
+        'src/main/assets/lisa2')
