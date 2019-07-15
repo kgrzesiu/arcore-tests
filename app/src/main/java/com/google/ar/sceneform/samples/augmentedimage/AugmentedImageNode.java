@@ -22,6 +22,7 @@ import android.util.Log;
 import com.google.ar.core.AugmentedImage;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.Node;
+import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import java.util.concurrent.CompletableFuture;
@@ -86,11 +87,14 @@ public class AugmentedImageNode extends AnchorNode {
     lisa_scale = max_image_edge / liza_max_size;
 
     // Mona lisa
-    localPosition.set(0 * image.getExtentX(), 0.0f, 0 * image.getExtentZ());
+    localPosition.set(0.0f * image.getExtentX(), -0.08f, 0 * image.getExtentZ());
     Node lisaNode = new Node();
     lisaNode.setParent(this);
     lisaNode.setLocalPosition(localPosition);
     lisaNode.setLocalScale(new Vector3(lisa_scale, lisa_scale, lisa_scale));
+    Quaternion currentRotation = lisaNode.getLocalRotation();
+    currentRotation.y = 180;
+    lisaNode.setLocalRotation(currentRotation);
     lisaNode.setRenderable(monaLisa.getNow(null));
 
   }
