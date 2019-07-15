@@ -17,13 +17,20 @@
 package com.google.ar.sceneform.samples.augmentedimage;
 
 import android.content.Context;
+import android.graphics.SurfaceTexture;
+import android.media.MediaPlayer;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.Gravity;
+import android.widget.Toast;
+
 import com.google.ar.core.AugmentedImage;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.Node;
-import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
+import com.google.ar.sceneform.rendering.Color;
+import com.google.ar.sceneform.rendering.ExternalTexture;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import java.util.concurrent.CompletableFuture;
 
@@ -38,7 +45,16 @@ public class AugmentedImageNode extends AnchorNode implements AugmentedNode {
 
   // The augmented image represented by this node.
   private AugmentedImage image;
-  private float lisa_scale = 0.0f;
+  @Nullable
+  private ModelRenderable videoRenderable;
+  private MediaPlayer mediaPlayer;
+  private ExternalTexture texture;
+
+  // The color to filter out of the video.
+  private static final Color CHROMA_KEY_COLOR = new Color(0.1843f, 1.0f, 0.098f);
+
+  // Controls the height of the video in world space.
+  private static final float VIDEO_HEIGHT_METERS = 0.85f;
 
   // Models of the 4 corners.  We use completable futures here to simplify
   // the error handling and asynchronous loading.  The loading is started with the
@@ -52,6 +68,32 @@ public class AugmentedImageNode extends AnchorNode implements AugmentedNode {
               .setSource(context, Uri.parse("lisa2.sfb"))
               .build();
     }
+
+    // Create an ExternalTexture for displaying the contents of the video.
+    texture = new ExternalTexture();
+
+    // Create an Android MediaPlayer to capture the video on the external texture's surface.
+    mediaPlayer = MediaPlayer.create(context, R.raw.lion_chroma);
+    mediaPlayer.setSurface(texture.getSurface());
+    mediaPlayer.setLooping(true);
+
+    ModelRenderable.builder()
+            .setSource(context, R.raw.chroma_key_video)
+            .build()
+            .thenAccept(
+                    renderable -> {
+                      videoRenderable = renderable;
+                      renderable.getMaterial().setExternalTexture("videoTexture", texture);
+                      renderable.getMaterial().setFloat4("keyColor", CHROMA_KEY_COLOR);
+                    })
+            .exceptionally(
+                    throwable -> {
+                      Toast toast =
+                              Toast.makeText(context, "Unable to load video renderable", Toast.LENGTH_LONG);
+                      toast.setGravity(Gravity.CENTER, 0, 0);
+                      toast.show();
+                      return null;
+                    });
   }
 
   /**
@@ -81,18 +123,33 @@ public class AugmentedImageNode extends AnchorNode implements AugmentedNode {
     // Make the 4 corner nodes.
     Vector3 localPosition = new Vector3();
 
-    // Make sure the longest edge fits inside the image.
-    final float liza_max_size = 13.48f;
-    final float max_image_edge = Math.max(image.getExtentX(), image.getExtentZ());
-    lisa_scale = max_image_edge / liza_max_size;
+    Node videoNode = new Node();
+    videoNode.setParent(this);
 
-    // Mona lisa
-    localPosition.set(0.0f * image.getExtentX(), -0.08f, 0 * image.getExtentZ());
-    Node lisaNode = new Node();
-    lisaNode.setParent(this);
-    lisaNode.setLocalPosition(localPosition);
-    lisaNode.setLocalScale(new Vector3(lisa_scale, lisa_scale, lisa_scale));
-    lisaNode.setRenderable(monaLisa.getNow(null));
+    // Set the scale of the node so that the aspect ratio of the video is correct.
+    float videoWidth = mediaPlayer.getVideoWidth();
+    float videoHeight = mediaPlayer.getVideoHeight();
+    videoNode.setLocalScale(
+            new Vector3(
+                    VIDEO_HEIGHT_METERS * (videoWidth / videoHeight), VIDEO_HEIGHT_METERS, 1.0f));
+
+    // Start playing the video when the first node is placed.
+    if (!mediaPlayer.isPlaying()) {
+      mediaPlayer.start();
+
+      // Wait to set the renderable until the first frame of the  video becomes available.
+      // This prevents the renderable from briefly appearing as a black quad before the video
+      // plays.
+      texture
+              .getSurfaceTexture()
+              .setOnFrameAvailableListener(
+                      (SurfaceTexture surfaceTexture) -> {
+                        videoNode.setRenderable(videoRenderable);
+                        texture.getSurfaceTexture().setOnFrameAvailableListener(null);
+                      });
+    } else {
+      videoNode.setRenderable(videoRenderable);
+    }
 
   }
 

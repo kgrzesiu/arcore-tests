@@ -86,3 +86,8 @@ sceneform.asset('sampledata/lisa2/lisa2.obj',
         'default',
         'sampledata/lisa2/lisa2.sfa',
         'src/main/assets/lisa2')
+
+sceneform.asset('sampledata/models/chroma_key_video.obj',
+        'sampledata/models/chroma_key_video_material.mat',
+        'sampledata/models/chroma_key_video.sfa',
+        'src/main/res/raw/chroma_key_video')
