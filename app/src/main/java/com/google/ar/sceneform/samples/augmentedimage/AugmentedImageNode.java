@@ -112,15 +112,11 @@ public class AugmentedImageNode extends AnchorNode implements AugmentedNode {
                     VIDEO_HEIGHT_METERS * scaleFactor * (videoWidth / videoHeight), VIDEO_HEIGHT_METERS * scaleFactor, 1.0f));
     //position
     Vector3 localPosition = new Vector3();
-    localPosition.set(0.0f * image.getExtentX(), -0.08f, 0 * image.getExtentZ());
+    localPosition.set(0.0f * image.getExtentX(), 0f, 0 * image.getExtentZ());
     videoNode.setLocalPosition(localPosition);
 
     //fix lion rotation
-    Quaternion currentRotation = videoNode.getLocalRotation();
-//    currentRotation.x = 0;
-//    currentRotation.y = -90;
-    currentRotation.z = 90;
-    currentRotation.w = 180;
+    Quaternion currentRotation = Quaternion.axisAngle(new Vector3(-1.0f,0.0f,0.0f), 90f);
     videoNode.setLocalRotation(currentRotation);
 
     // Start playing the video when the first node is placed.
