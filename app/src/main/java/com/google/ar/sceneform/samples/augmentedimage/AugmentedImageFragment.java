@@ -43,7 +43,7 @@ public class AugmentedImageFragment extends ArFragment {
   private static final String TAG = "AugmentedImageFragment";
 
   // This is a pre-created database containing the sample image.
-  private static final String SAMPLE_IMAGE_DATABASE = "newimages.imgdb";
+  private static final String SAMPLE_IMAGE_DATABASE = "images3.imgdb"; //"newimages.imgdb";
 
   // Do a runtime check for the OpenGL level available at runtime to avoid Sceneform crashing the
   // application.
