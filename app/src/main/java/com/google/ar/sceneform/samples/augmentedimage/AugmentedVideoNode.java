@@ -19,9 +19,7 @@ package com.google.ar.sceneform.samples.augmentedimage;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
@@ -33,16 +31,15 @@ import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.Color;
 import com.google.ar.sceneform.rendering.ExternalTexture;
 import com.google.ar.sceneform.rendering.ModelRenderable;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Node for rendering an augmented image. The image is framed by placing the virtual picture frame
  * at the corners of the augmented image trackable.
  */
 @SuppressWarnings({"AndroidApiChecker"})
-public class AugmentedImageNode extends AnchorNode implements AugmentedNode {
+public class AugmentedVideoNode extends AnchorNode implements AugmentedNode {
 
-  private static final String TAG = "AugmentedImageNode";
+  private static final String TAG = "AugmentedVideoNode";
 
   // The augmented image represented by this node.
   private AugmentedImage image;
@@ -57,7 +54,7 @@ public class AugmentedImageNode extends AnchorNode implements AugmentedNode {
   // Controls the height of the video in world space.
   private static final float VIDEO_HEIGHT_METERS = 0.85f;
 
-  public AugmentedImageNode(Context context) {
+  public AugmentedVideoNode(Context context) {
 
     // Create an ExternalTexture for displaying the contents of the video.
     texture = new ExternalTexture();

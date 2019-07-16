@@ -91,3 +91,9 @@ sceneform.asset('sampledata/models/chroma_key_video.obj',
         'sampledata/models/chroma_key_video_material.mat',
         'sampledata/models/chroma_key_video.sfa',
         'src/main/res/raw/chroma_key_video')
+
+
+sceneform.asset('sampledata/lisaincube/lisainthecube.obj',
+        'default',
+        'sampledata/lisaincube/lisainthecube.sfa',
+        'src/main/assets/lisainthecube')

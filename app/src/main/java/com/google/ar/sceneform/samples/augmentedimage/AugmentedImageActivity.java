@@ -42,82 +42,87 @@ import java.util.Map;
  */
 public class AugmentedImageActivity extends AppCompatActivity {
 
-  private ArFragment arFragment;
-  private ImageView fitToScanView;
+    private ArFragment arFragment;
+    private ImageView fitToScanView;
 
-  // Augmented image and its associated center pose anchor, keyed by the augmented image in
-  // the database.
-  private final Map<AugmentedImage, AugmentedNode> augmentedImageMap = new HashMap<>();
+    // Augmented image and its associated center pose anchor, keyed by the augmented image in
+    // the database.
+    private final Map<AugmentedImage, AugmentedNode> augmentedImageMap = new HashMap<>();
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_main);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-    arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
-    fitToScanView = findViewById(R.id.image_view_fit_to_scan);
+        arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
+        fitToScanView = findViewById(R.id.image_view_fit_to_scan);
 
-    arFragment.getArSceneView().getScene().addOnUpdateListener(this::onUpdateFrame);
-  }
-
-  @Override
-  protected void onResume() {
-    super.onResume();
-    if (augmentedImageMap.isEmpty()) {
-      fitToScanView.setVisibility(View.VISIBLE);
-    }
-  }
-
-  /**
-   * Registered with the Sceneform Scene object, this method is called at the start of each frame.
-   *
-   * @param frameTime - time since last frame.
-   */
-  private void onUpdateFrame(FrameTime frameTime) {
-    Frame frame = arFragment.getArSceneView().getArFrame();
-
-    // If there is no frame, just return.
-    if (frame == null) {
-      return;
+        arFragment.getArSceneView().getScene().addOnUpdateListener(this::onUpdateFrame);
     }
 
-    Collection<AugmentedImage> updatedAugmentedImages =
-        frame.getUpdatedTrackables(AugmentedImage.class);
-    for (AugmentedImage augmentedImage : updatedAugmentedImages) {
-      switch (augmentedImage.getTrackingState()) {
-        case PAUSED:
-          // When an image is in PAUSED state, but the camera is not PAUSED, it has been detected,
-          // but not yet tracked.
-          String text = "Detected Image " + augmentedImage.getIndex();
-          SnackbarHelper.getInstance().showMessage(this, text);
-          break;
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (augmentedImageMap.isEmpty()) {
+            fitToScanView.setVisibility(View.VISIBLE);
+        }
+    }
 
-        case TRACKING:
-          // Have to switch to UI Thread to update View.
-          fitToScanView.setVisibility(View.GONE);
+    /**
+     * Registered with the Sceneform Scene object, this method is called at the start of each frame.
+     *
+     * @param frameTime - time since last frame.
+     */
+    private void onUpdateFrame(FrameTime frameTime) {
+        Frame frame = arFragment.getArSceneView().getArFrame();
 
-          // Create a new anchor for newly found images.
-          if (!augmentedImageMap.containsKey(augmentedImage)) {
-            int index = augmentedImage.getIndex();
-            if (index <= 1){
-              MonaLisaAugmentedNode node = new MonaLisaAugmentedNode(this);
-              node.setImage(augmentedImage);
-              augmentedImageMap.put(augmentedImage, node);
-              arFragment.getArSceneView().getScene().addChild(node);
-            } else if (index <= 3) {
-              AugmentedImageNode node = new AugmentedImageNode(this);
-              node.setImage(augmentedImage);
-              augmentedImageMap.put(augmentedImage, node);
-              arFragment.getArSceneView().getScene().addChild(node);
+        // If there is no frame, just return.
+        if (frame == null) {
+            return;
+        }
+
+        Collection<AugmentedImage> updatedAugmentedImages =
+                frame.getUpdatedTrackables(AugmentedImage.class);
+        for (AugmentedImage augmentedImage : updatedAugmentedImages) {
+            switch (augmentedImage.getTrackingState()) {
+                case PAUSED:
+                    // When an image is in PAUSED state, but the camera is not PAUSED, it has been detected,
+                    // but not yet tracked.
+                    String text = "Detected Image " + augmentedImage.getIndex();
+                    SnackbarHelper.getInstance().showMessage(this, text);
+                    break;
+
+                case TRACKING:
+                    // Have to switch to UI Thread to update View.
+                    fitToScanView.setVisibility(View.GONE);
+
+                    // Create a new anchor for newly found images.
+                    if (!augmentedImageMap.containsKey(augmentedImage)) {
+                        int index = augmentedImage.getIndex();
+                        if (index < 2){
+                            AugmentedVideoNode node = new AugmentedVideoNode(this);
+                            node.setImage(augmentedImage);
+                            augmentedImageMap.put(augmentedImage, node);
+                            arFragment.getArSceneView().getScene().addChild(node);
+                        } else if (index < 3){
+                            MonaLisaAugmentedNode node = new MonaLisaAugmentedNode(this);
+                            node.setImage(augmentedImage);
+                            augmentedImageMap.put(augmentedImage, node);
+                            arFragment.getArSceneView().getScene().addChild(node);
+                        } else if (index < 4) {
+                            MonaLisaInCubeAugmentedNode node = new MonaLisaInCubeAugmentedNode(this);
+                            node.setImage(augmentedImage);
+                            augmentedImageMap.put(augmentedImage, node);
+                            arFragment.getArSceneView().getScene().addChild(node);
+                        }
+                    }
+                    break;
+
+                case STOPPED:
+                    augmentedImageMap.remove(augmentedImage);
+                    break;
             }
-          }
-          break;
-
-        case STOPPED:
-          augmentedImageMap.remove(augmentedImage);
-          break;
-      }
+        }
     }
-  }
 
 }

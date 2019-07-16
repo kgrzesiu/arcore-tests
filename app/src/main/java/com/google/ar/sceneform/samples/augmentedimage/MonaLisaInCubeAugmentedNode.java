@@ -34,7 +34,7 @@ import java.util.concurrent.CompletableFuture;
  * at the corners of the augmented image trackable.
  */
 @SuppressWarnings({"AndroidApiChecker"})
-public class MonaLisaAugmentedNode extends AnchorNode implements AugmentedNode {
+public class MonaLisaInCubeAugmentedNode extends AnchorNode implements AugmentedNode {
 
   private static final String TAG = "AugmentedVideoNode";
 
@@ -47,11 +47,11 @@ public class MonaLisaAugmentedNode extends AnchorNode implements AugmentedNode {
   // first construction of an instance, and then used when the image is set.
   private static CompletableFuture<ModelRenderable> monaLisa;
 
-  public MonaLisaAugmentedNode(Context context) {
+  public MonaLisaInCubeAugmentedNode(Context context) {
     // Upon construction, start loading the models for the corners of the frame.
     if (monaLisa == null) {
       monaLisa = ModelRenderable.builder()
-              .setSource(context, Uri.parse("lisa2.sfb"))
+              .setSource(context, Uri.parse("lisainthecube.sfb"))
               .build();
     }
   }
@@ -88,9 +88,10 @@ public class MonaLisaAugmentedNode extends AnchorNode implements AugmentedNode {
     final float liza_max_size = 13.48f;
     final float max_image_edge = Math.max(image.getExtentX(), image.getExtentZ());
     lisa_scale = max_image_edge / liza_max_size;
+    lisa_scale *= 8;
 
     // Mona lisa
-    localPosition.set(0.0f * image.getExtentX(), -0.08f, 0 * image.getExtentZ());
+    localPosition.set(0.0f * image.getExtentX(), -0.4f, 0 * image.getExtentZ());
     Node lisaNode = new Node();
     lisaNode.setParent(this);
     lisaNode.setLocalPosition(localPosition);
