@@ -99,12 +99,12 @@ public class AugmentedImageActivity extends AppCompatActivity {
           // Create a new anchor for newly found images.
           if (!augmentedImageMap.containsKey(augmentedImage)) {
             int index = augmentedImage.getIndex();
-            if (index == 0){
+            if (index == 1){
               MonaLisaAugmentedNode node = new MonaLisaAugmentedNode(this);
               node.setImage(augmentedImage);
               augmentedImageMap.put(augmentedImage, node);
               arFragment.getArSceneView().getScene().addChild(node);
-            } else if (index == 1) {
+            } else if (index == 0) {
               AugmentedImageNode node = new AugmentedImageNode(this);
               node.setImage(augmentedImage);
               augmentedImageMap.put(augmentedImage, node);

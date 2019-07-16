@@ -105,14 +105,18 @@ public class AugmentedImageNode extends AnchorNode implements AugmentedNode {
     // Set the scale of the node so that the aspect ratio of the video is correct.
     float videoWidth = mediaPlayer.getVideoWidth();
     float videoHeight = mediaPlayer.getVideoHeight();
-    float scaleFactor = 0.5f;
+//    final float max_video_edge = Math.max(videoWidth, videoHeight);
+    final float max_image_edge = Math.max(image.getExtentX(), image.getExtentZ());
+    float scaleFactor = max_image_edge / VIDEO_HEIGHT_METERS;
 
-    videoNode.setLocalScale(
+    videoNode.setLocalScale(new Vector3(scaleFactor, scaleFactor, 1.0f));
+
+    /*videoNode.setLocalScale(
             new Vector3(
-                    VIDEO_HEIGHT_METERS * scaleFactor * (videoWidth / videoHeight), VIDEO_HEIGHT_METERS * scaleFactor, 1.0f));
+                    VIDEO_HEIGHT_METERS * scaleFactor * (videoWidth / videoHeight), VIDEO_HEIGHT_METERS * scaleFactor, 1.0f));*/
     //position
     Vector3 localPosition = new Vector3();
-    localPosition.set(0.0f * image.getExtentX(), 0f, 0 * image.getExtentZ());
+    localPosition.set(0.0f * image.getExtentX(), 0f, 0.5f * image.getExtentZ());
     videoNode.setLocalPosition(localPosition);
 
     //fix lion rotation
